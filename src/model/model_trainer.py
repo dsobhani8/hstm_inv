@@ -120,8 +120,6 @@ class ModelTrainer():
 
 
 
-
-
 	def train_supervised_model(self, training_loader, epochs=10, extra_epochs=10, lr=0.01, weight_decay=1.2e-6):
 		if self.do_pretraining_stage:
 			pretraining_optim = optim.Adam(self.model.parameters(), lr=lr ,weight_decay=weight_decay)
