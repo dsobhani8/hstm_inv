@@ -33,7 +33,7 @@ class TextResponseDataset(Dataset):
 			'immigration',
 			'samesex',
 			'deathpenalty',
-			'guncontrol'}
+			'guncontrol', 'custom'}
 
 	def __init__(self, dataset_name, data_file, processed_data_file, **kwargs):
 		super(Dataset, self).__init__()

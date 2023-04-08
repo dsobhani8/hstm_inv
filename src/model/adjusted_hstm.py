@@ -203,7 +203,7 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 
 		if do_prediction:
 			expected_label_pred = self.predict_labels(theta, normalized_bows)
-			other_loss += loss(expected_label_pred, labels) + self.compute_mmd(expected_label_pred, labels) * 49 #49 is num used in paper
+			other_loss += loss(expected_label_pred, labels) + self.compute_mmd(expected_label_pred.reshape(-1,1).to(torch.float64), labels.reshape(-1,1).to(torch.float64)) * 49 #49 is num used in paper
 			if penalty_gamma:
 				other_loss += get_l1_loss(self.gammas, C=self.C_topics)
 			if penalty_bow:
