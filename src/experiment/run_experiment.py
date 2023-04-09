@@ -57,6 +57,7 @@ def main(argv):
 		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
 	else:
 		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.datafile, proc_file)
+	print(text_dataset)
 
 	text_dataset.process_dataset()
 	text_dataset.preprocessing()
@@ -94,7 +95,7 @@ def main(argv):
 			beta_init=beta,
 			predict_with_z=True)
 	else:
-		model = adjusted_hstm.HeterogeneousSupervisedTopicModel(num_topics, vocab_size, n_docs, 
+		model = adjusted_hstm.HeterogeneousSupervisedTopicModel(num_topics, vocab_size, n_docs,
 		beta_init=beta, 
 		label_is_bool=label_is_bool, 
 		C_weights=FLAGS.C, 
