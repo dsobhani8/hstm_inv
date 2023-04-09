@@ -20,7 +20,7 @@ def get_l1_loss(x, dim=0, C=0.01):
 	return loss
 
 class HeterogeneousSupervisedTopicModel(nn.Module):
-	def __init__(self, num_topics, documents, vocab_size, num_documents, t_hidden_size=300, enc_drop=0.0, theta_act='relu', label_is_bool=False, beta_init=None, C_weights=5e-4, C_topics=5e-6, response_model='hstm-all'):
+	def __init__(self, num_topics, vocab_size, num_documents, t_hidden_size=300, enc_drop=0.0, theta_act='relu', label_is_bool=False, beta_init=None, C_weights=5e-4, C_topics=5e-6, response_model='hstm-all'):
 		super(HeterogeneousSupervisedTopicModel, self).__init__()
 
 		## define hyperparameters
