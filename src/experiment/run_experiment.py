@@ -57,10 +57,10 @@ def main(argv):
 		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
 	else:
 		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.datafile, proc_file)
-	print(text_dataset.docs)
 
 	text_dataset.process_dataset()
 	text_dataset.preprocessing()
+	print(text_dataset.docs)
 
 	total_docs = text_dataset.get_full_size()
 
