@@ -60,7 +60,6 @@ def main(argv):
 
 	text_dataset.process_dataset()
 	text_dataset.preprocessing()
-	print(text_dataset.docs)
 
 	total_docs = text_dataset.get_full_size()
 
@@ -80,6 +79,7 @@ def main(argv):
                 'shuffle': True,
                 'num_workers': 0
                 }
+	#print(text_dataset.docs) ##go to the model_trainer and determine how the docs appear in that context (i,e what dataloader sends)
 	training_dataloader = DataLoader(text_dataset, **train_params)
 	vocab_size = text_dataset.get_vocab_size()
 	n_docs = len(text_dataset)

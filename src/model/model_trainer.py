@@ -126,6 +126,8 @@ class ModelTrainer():
 			for epoch in range(extra_epochs):
 				self.model.train()
 				for _,data in enumerate(training_loader, 0):
+					print("hellooooo")
+					print(data) #change
 					normalized_bow = data['normalized_bow'].to(device, dtype = torch.float)
 					bow = data['bow'].to(device, dtype = torch.long)
 					labels = data['label'].to(device, dtype = torch.float)
