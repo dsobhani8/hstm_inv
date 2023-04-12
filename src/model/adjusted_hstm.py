@@ -156,34 +156,6 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 		return expected_pred
 
 
-	def compute_kernel(self, x, y, sigma_sqr=None):
-		"""
-		taken from https://github.com/napsternxg/pytorch-practice/blob/master/Pytorch%20-%20MMD%20VAE.ipynb
-		"""
-		x_size = x.size(0)
-		y_size = y.size(0)
-		dim = x.size(1)
-		# sigma_sqr = sigma_sqr if sigma_sqr is not None else dim / 2
-		x = x.unsqueeze(1)  # (x_size, 1, dim)
-		y = y.unsqueeze(0)  # (1, y_size, dim)
-		tiled_x = x.expand(x_size, y_size, dim)
-		tiled_y = y.expand(x_size, y_size, dim)
-		kernel_input = (tiled_x - tiled_y).pow(2).mean(2) / float(2 * sigma_sqr)
-		return torch.exp(-kernel_input)  # (x_size, y_size)
-
-
-	def compute_mmd(self, x, y):
-		"""
-		taken from https://github.com/napsternxg/pytorch-practice/blob/master/Pytorch%20-%20MMD%20VAE.ipynb
-		"""
-		sigma_sqr = 10
-		x_kernel = self.compute_kernel(x, x, sigma_sqr)
-		y_kernel = self.compute_kernel(y, y, sigma_sqr)
-		xy_kernel = self.compute_kernel(x, y, sigma_sqr)
-		mmd = x_kernel.mean() + y_kernel.mean() - 2 * xy_kernel.mean()
-		mmd = torch.maximum(torch.zeros_like(mmd), mmd)
-		return mmd
-
 	def forward(self, bows, normalized_bows, labels, theta=None, do_prediction=True, penalty_bow=True, penalty_gamma=True):
 		if self.is_bool:
 			loss = nn.BCEWithLogitsLoss()
@@ -203,7 +175,7 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 
 		if do_prediction:
 			expected_label_pred = self.predict_labels(theta, normalized_bows)
-			other_loss += loss(expected_label_pred, labels) + self.compute_mmd(expected_label_pred.reshape(-1,1).to(torch.float64), labels.reshape(-1,1).to(torch.float64)) * 49 #49 is num used in paper
+			other_loss += loss(expected_label_pred, labels)
 			if penalty_gamma:
 				other_loss += get_l1_loss(self.gammas, C=self.C_topics)
 			if penalty_bow:

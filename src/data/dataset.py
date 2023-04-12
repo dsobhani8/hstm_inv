@@ -91,6 +91,14 @@ class TextResponseDataset(Dataset):
 	def get_vocab_size(self):
 		return self.vocab.shape[0]
 
+	def get_topic(self, doc):
+		if doc[:3] == "IMM":
+			return 0
+		elif doc[:3] == "SSM":
+			return 1
+		else:
+			return None
+
 	def process_dataset(self):
 		if os.path.exists(self.processed_data_file):
 			counts, responses, vocab, docs = self.load_processed_data()
@@ -152,6 +160,9 @@ class TextResponseDataset(Dataset):
 		self.tr_normalized_counts = self.normalized_counts[tr_indices, :]
 		self.te_normalized_counts = self.normalized_counts[te_indices, :]
 
+		self.tr_topics = [self.get_topic(doc) for doc in self.tr_docs] #new
+		self.te_topics = [self.get_topic(doc) for doc in self.te_docs] #new
+
 		if self.pretrained_theta is not None:
 			self.tr_pretrained_theta = self.pretrained_theta[tr_indices, :]
 			self.te_pretrained_theta = self.pretrained_theta[te_indices,:]
@@ -164,7 +175,8 @@ class TextResponseDataset(Dataset):
 			datadict = {
 					'normalized_bow':torch.tensor(self.tr_normalized_counts[idx,:], dtype=torch.float),
 					'bow':torch.tensor(self.tr_counts[idx,:], dtype=torch.long),
-					'label':torch.tensor(self.tr_labels[idx], dtype=torch.float)
+					'label':torch.tensor(self.tr_labels[idx], dtype=torch.float),
+					'topic': self.tr_topics[idx]
 				}
 			if self.tr_pretrained_theta is not None:
 				datadict.update({'pretrained_theta':torch.tensor(self.tr_pretrained_theta[idx,:], dtype=torch.float)})
@@ -172,7 +184,8 @@ class TextResponseDataset(Dataset):
 			datadict = {
 					'normalized_bow':torch.tensor(self.te_normalized_counts[idx,:], dtype=torch.float),
 					'bow':torch.tensor(self.te_counts[idx,:], dtype=torch.long),
-					'label':torch.tensor(self.te_labels[idx], dtype=torch.float)
+					'label':torch.tensor(self.te_labels[idx], dtype=torch.float),
+					'topic': self.tr_topics[idx]
 				}
 			if self.te_pretrained_theta is not None:
 				datadict.update({'pretrained_theta':torch.tensor(self.te_pretrained_theta[idx,:], dtype=torch.float)})
