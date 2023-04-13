@@ -158,11 +158,15 @@ class ModelTrainer():
 					labels = data['label'].to(device, dtype = torch.float)
 					topics = data['topic'].to(device, dtype=torch.float)  # Add this line
 
-					mmd_loss = self.compute_mmd(labels.reshape(-1, 1).to(torch.float64), topics.reshape(-1, 1).to(torch.float64) * 49)  # Add this line
-					print(mmd_loss)
+					predictions, recon_loss, l1_penalty, kld_theta = self.model(bow, normalized_bow, labels, do_prediction=True)
 
-					recon_loss, l1_penalty, kld_theta = self.model(bow, normalized_bow, labels, do_prediction=False)
-					total_loss = recon_loss + l1_penalty + kld_theta
+					predictions_z0 = predictions[topics == 0]
+					predictions_z1 = predictions[topics == 1]
+
+					mmd_loss = self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64), predictions_z1.reshape(-1, 1).to(torch.float64)) *49
+
+					total_loss = recon_loss + l1_penalty + kld_theta + mmd_loss
+
 					pretraining_optim.zero_grad()
 					total_loss.backward()
 					pretraining_optim.step()
@@ -170,8 +174,9 @@ class ModelTrainer():
 					if _%5000==0:
 						acc_loss = torch.sum(recon_loss).item()
 						acc_kl_theta_loss = torch.sum(kld_theta).item()
-						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss)
-						sys.stdout.flush()
+						acc_mmd_loss = torch.sum(mmd_loss).item()
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "MMD loss.:", acc_mmd_loss)
+						#sys.stdout.flush()
 
 
 		for epoch in range(epochs):
