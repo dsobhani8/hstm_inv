@@ -97,7 +97,7 @@ class TextResponseDataset(Dataset):
 		elif doc[:3] == "SSM":
 			return 1
 		else:
-			return None
+			return -1
 
 	def process_dataset(self):
 		if os.path.exists(self.processed_data_file):
