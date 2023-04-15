@@ -109,7 +109,8 @@ def main(argv):
 		do_finetuning=FLAGS.do_finetuning,
 		save=FLAGS.save,
 		load=FLAGS.load,
-		model_file=FLAGS.model_file)
+		model_file=FLAGS.model_file,
+		is_MMD=FLAGS.is_MMD)
 	
 	trainer.train(training_dataloader, epochs=FLAGS.epochs, extra_epochs=FLAGS.extra_epochs)
 
@@ -210,5 +211,7 @@ if __name__ == '__main__':
 	flags.DEFINE_boolean("save", False, "flag to save model.")
 	flags.DEFINE_boolean("load", False, "flag to load saved model.")
 	flags.DEFINE_boolean("print_latex", False, "flag to print latex for tables.")
-	
+
+	flags.DEFINE_boolean("is_MMD", False, "flag to specify if Maximum Mean Discrepancy is used or not.")
+
 	app.run(main)

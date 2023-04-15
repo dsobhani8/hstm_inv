@@ -10,7 +10,7 @@ from scipy.special import expit
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ModelTrainer():
-	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, **kwargs):
+	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, **kwargs):
 		self.model = model
 		self.model_name = model_name
 		self.use_pretrained = use_pretrained
@@ -19,6 +19,7 @@ class ModelTrainer():
 		self.save=save
 		self.load=load
 		self.model_file = model_file
+		self.is_MMD = is_MMD
 
 		self.beta_penalty = 1.0
 		if use_pretrained:
@@ -156,7 +157,7 @@ class ModelTrainer():
 					bow = data['bow'].to(device, dtype = torch.long)
 					labels = data['label'].to(device, dtype = torch.float)
 
-					predictions, recon_loss, l1_penalty, kld_theta = self.model(bow, normalized_bow, labels, do_prediction=True)
+					recon_loss, l1_penalty, kld_theta = self.model(bow, normalized_bow, labels, do_prediction=False)
 
 					total_loss = recon_loss + l1_penalty + kld_theta
 
@@ -187,13 +188,20 @@ class ModelTrainer():
 				predictions, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels, theta=pretrained_theta,
 					penalty_bow=self.penalty_bow, penalty_gamma=self.penalty_gamma)
 
-				predictions_z0 = predictions[topics == 0]
-				predictions_z1 = predictions[topics == 1]
+				if self.is_MMD:
+					predictions_z0 = predictions[topics == 0]
+					predictions_z1 = predictions[topics == 1]
 
-				mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
-											 predictions_z1.reshape(-1, 1).to(torch.float64)) * 49)
+					mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
+												 predictions_z1.reshape(-1, 1).to(torch.float64)) * 49)
 
-				total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
+					total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
+
+
+				else:
+					mmd_loss = 0
+					total_loss = recon_loss + supervised_loss + self.beta_penalty * kld_theta
+
 				full_optimizer.zero_grad()
 				total_loss.backward()
 				full_optimizer.step()
@@ -202,8 +210,11 @@ class ModelTrainer():
 					acc_loss = torch.sum(recon_loss).item()
 					acc_kl_theta_loss = torch.sum(kld_theta).item()
 					acc_sup_loss = torch.sum(supervised_loss).item()
-					acc_mmd_loss = torch.sum(mmd_loss).item()
-					print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
+					if self.is_MMD:
+						acc_mmd_loss = torch.sum(mmd_loss).item()
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
+					else:
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
 					sys.stdout.flush()
 
 
