@@ -10,7 +10,7 @@ from scipy.special import expit
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ModelTrainer():
-	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, MMD_pen_coeff=18, **kwargs):
+	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, MMD_pen_coeff=2, **kwargs):
 		self.model = model
 		self.model_name = model_name
 		self.use_pretrained = use_pretrained
