@@ -110,8 +110,9 @@ def main(argv):
 		save=FLAGS.save,
 		load=FLAGS.load,
 		model_file=FLAGS.model_file,
-		is_MMD=FLAGS.is_MMD)
-	
+		is_MMD=FLAGS.is_MMD,
+		MMD_pen_coeff=FLAGS.MMD_pen_coeff)
+
 	trainer.train(training_dataloader, epochs=FLAGS.epochs, extra_epochs=FLAGS.extra_epochs)
 
 	test_nll = trainer.evaluate_heldout_nll(text_dataset.te_counts, 
@@ -213,5 +214,6 @@ if __name__ == '__main__':
 	flags.DEFINE_boolean("print_latex", False, "flag to print latex for tables.")
 
 	flags.DEFINE_boolean("is_MMD", False, "flag to specify if Maximum Mean Discrepancy is used or not.")
+	flags.DEFINE_float("MMD_pen_coeff", 18, "penalty coefficient of the MMD regularizer.")
 
 	app.run(main)

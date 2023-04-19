@@ -10,7 +10,7 @@ from scipy.special import expit
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ModelTrainer():
-	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, **kwargs):
+	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, MMD_pen_coeff=18, **kwargs):
 		self.model = model
 		self.model_name = model_name
 		self.use_pretrained = use_pretrained
@@ -20,6 +20,7 @@ class ModelTrainer():
 		self.load=load
 		self.model_file = model_file
 		self.is_MMD = is_MMD
+		self.MMD_pen_coeff= MMD_pen_coeff
 
 		self.beta_penalty = 1.0
 		if use_pretrained:
@@ -193,7 +194,7 @@ class ModelTrainer():
 					predictions_z1 = predictions[topics == 1]
 
 					mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
-												 predictions_z1.reshape(-1, 1).to(torch.float64)) * 49)
+												 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
 
 					total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
 
