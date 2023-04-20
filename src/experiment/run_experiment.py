@@ -213,7 +213,7 @@ if __name__ == '__main__':
 	flags.DEFINE_boolean("load", False, "flag to load saved model.")
 	flags.DEFINE_boolean("print_latex", False, "flag to print latex for tables.")
 
-	flags.DEFINE_boolean("is_MMD", False, "flag to specify if Maximum Mean Discrepancy is used or not.")
-	flags.DEFINE_float("MMD_pen_coeff", 2, "penalty coefficient of the MMD regularizer.")
+	flags.DEFINE_boolean("is_MMD", False, "flag to specify if causal regularizer is used or not.")
+	flags.DEFINE_float("MMD_pen_coeff", 2, "penalty coefficient of the causal regularizer.")
 
 	app.run(main)
