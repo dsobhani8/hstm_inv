@@ -26,12 +26,18 @@ To run the experiment from the write-up in colab please run the following code:
  ```
  
 The two new datasets are:
+
 (1) comp_spurious_train_spurious_test.npz
+
 (2) comp_spurious_train_non_spurious_test.npz
 
+
 The two new flags are:
+
 (1) is_MMD (default is False)
+
 (2) MMD_pen_coeff (default is 2)
+
 
 It is important to keep data=custom and train_size=5000
 
