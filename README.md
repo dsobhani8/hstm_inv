@@ -5,7 +5,7 @@ This repository leverages code from:
   
 Please visit to see the [original paper](https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00487/111727/Heterogeneous-Supervised-Topic-Models) and for the [original code](https://github.com/dsridhar91/hstm)
 
-In this repository we introduce two new datasets that have spurious correlations induced, and have added the anti-causal regularizer from Counterfactual Invariance to Spurious Correlations (Veitch et al., 2021). 
+In this repository, we introduce two new datasets with spurious correlations induced and added the anti-causal regularizer from Counterfactual Invariance to Spurious Correlations (Veitch et al., 2021).
 
 **To run the experiment from the write-up in colab please run the following code:**
 
