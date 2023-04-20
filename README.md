@@ -45,5 +45,5 @@ It is important to keep data=custom and train_size=5000
 
 [1] Heterogeneous Supervised Topic Models, by Dhanya Sridhar, Hal Daumé III, and David Blei.
 
-[2] Counterfactual Invariance to Spurious Correlations: Why and How to Pass Stress Tests, by Victor Veitch1, Alexander D’Amour, Steve Yadlowsky, and Jacob Eisenstein
+[2] Counterfactual Invariance to Spurious Correlations: Why and How to Pass Stress Tests, by Victor Veitch, Alexander D’Amour, Steve Yadlowsky, and Jacob Eisenstein
 
