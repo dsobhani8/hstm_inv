@@ -25,7 +25,8 @@ In this repository, we introduce two new datasets with spurious correlations ind
 !python -m experiment.run_experiment --procfile=/content/hstm_inv/dat/proc/comp_spurious_train_spurious_test.npz --data=custom --train_size=5000 --num_topics=20 --batch_size=32 --train_test_mode=True --do_pretraining_stage=True --is_MMD=True --MMD_pen_coeff=2
  ```
  
- **To run the original HSTM on the spurious dataset run this line instead of the one above:**
+
+**To run the original HSTM on the spurious dataset run this line instead of the one above:**
  
  ```
 !python -m experiment.run_experiment --procfile=/content/hstm_inv/dat/proc/comp_spurious_train_spurious_test.npz --data=custom --train_size=5000 --num_topics=20 --batch_size=32 --train_test_mode=True --do_pretraining_stage=True
