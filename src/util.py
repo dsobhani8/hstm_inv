@@ -6,6 +6,7 @@ def split_train_test_indices(num_docs, prop_to_split=0.5, seed=42):
 	np.random.shuffle(indices)
 	num_sample = int(num_docs * prop_to_split)
 	train_indices = indices[:num_sample]
+	print(len(train_indices))
 	test_indices = indices[num_sample:]
 	return train_indices, test_indices
 
