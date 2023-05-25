@@ -12,7 +12,7 @@ from src import mmd_loss
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ModelTrainer():
-	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, MMD_pen_coeff=2, **kwargs):
+	def __init__(self, model, model_name, use_pretrained, do_pretraining_stage, do_finetuning, save=False, load=False, model_file=None, is_MMD=False, MMD_pen_coeff=2, mmd=False, **kwargs):
 		self.model = model
 		self.model_name = model_name
 		self.use_pretrained = use_pretrained
@@ -23,6 +23,7 @@ class ModelTrainer():
 		self.model_file = model_file
 		self.is_MMD = is_MMD
 		self.MMD_pen_coeff= MMD_pen_coeff
+		self.mmd = mmd
 
 		self.beta_penalty = 1.0
 		if use_pretrained:
