@@ -6,7 +6,6 @@ from sklearn import metrics
 from sklearn.linear_model import Ridge
 import sys
 from scipy.special import expit
-from src import mmd_loss
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

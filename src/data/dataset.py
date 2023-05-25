@@ -112,7 +112,7 @@ class TextResponseDataset(Dataset):
 
 	def process_dataset(self):
 		if os.path.exists(self.processed_data_file):
-			counts, responses, vocab, docs = self.load_processed_data()
+			counts, responses, vocab, docs, balanced_weights_pos, balanced_weights_neg, balanced_weights = self.load_processed_data()
 		else:
 			docs, responses = self.load_data_from_raw()
 			stop = stopwords.words('english')
