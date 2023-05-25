@@ -6,6 +6,8 @@ from sklearn import metrics
 from sklearn.linear_model import Ridge
 import sys
 from scipy.special import expit
+from src import mmd_loss
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -179,7 +181,12 @@ class ModelTrainer():
 				normalized_bow = data['normalized_bow'].to(device, dtype = torch.float)
 				bow = data['bow'].to(device, dtype = torch.long)
 				labels = data['label'].to(device, dtype = torch.float)
-				topics = data['topic'].to(device, dtype=torch.float)  # Add this line
+				confounder = data['topic'].to(device, dtype=torch.float)  # Add this line
+
+				if self.mmd:
+					balanced_weights_pos = data['balanced_weights_pos'].to(device, dtype=torch.float)
+					balanced_weights_neg = data['balanced_weights_neg'].to(device, dtype=torch.float)
+					balanced_weights = data['balanced_weights'].to(device, dtype=torch.float)
 
 				if 'pretrained_theta' in data:
 					pretrained_theta = data['pretrained_theta']
@@ -189,15 +196,30 @@ class ModelTrainer():
 				predictions, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels, theta=pretrained_theta,
 					penalty_bow=self.penalty_bow, penalty_gamma=self.penalty_gamma)
 
-				if self.is_MMD:
-					predictions_z0 = predictions[topics == 0]
-					predictions_z1 = predictions[topics == 1]
+				# if self.is_MMD:
+				# 	predictions_z0 = predictions[topics == 0]
+				# 	predictions_z1 = predictions[topics == 1]
+				#
+				# 	mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
+				# 								 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
+				#
+				# 	total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
 
-					mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
-												 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
+				if self.mmd:
+					weighted_mmd_vals= []
+					embedding, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels,
+																					 theta=pretrained_theta,
+																					 penalty_bow=self.penalty_bow,
+																					 penalty_gamma=self.penalty_gamma)
 
-					total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
+					weighted_loss = balanced_weights * supervised_loss
+					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
 
+					mmd_val = mmd_loss.mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
+					weighted_mmd_vals.append(mmd_val[0])
+
+					weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
+					total_loss = (weighted_loss + (10.0 * mmd_val)) + recon_loss + self.beta_penalty*kld_theta
 
 				else:
 					mmd_loss = 0

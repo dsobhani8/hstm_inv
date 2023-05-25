@@ -86,7 +86,18 @@ class TextResponseDataset(Dataset):
 		vocab = arrays['vocab']
 		docs = arrays['docs']
 
-		return counts, labels, vocab, docs
+		balanced_weights_pos = None
+		balanced_weights_neg = None
+		balanced_weights = None
+
+		if self.dataset_name == 'custom' and self.mmd:  # Check if the dataset is 'custom' and mmd is True
+			balanced_weights_pos = arrays[
+				'balanced_weights_pos']  # Load balanced_weights_pos from the processed data file
+			balanced_weights_neg = arrays[
+				'balanced_weights_neg']  # Load balanced_weights_neg from the processed data file
+			balanced_weights = balanced_weights_pos + balanced_weights_neg  # Compute balanced_weights as the sum of balanced_weights_pos and balanced_weights_neg
+
+		return counts, labels, vocab, docs, balanced_weights_pos, balanced_weights_neg, balanced_weights
 
 	def get_vocab_size(self):
 		return self.vocab.shape[0]
@@ -152,7 +163,7 @@ class TextResponseDataset(Dataset):
 	def assign_splits(self, tr_indices, te_indices):
 		self.tr_counts = self.counts[tr_indices, :]
 		self.tr_labels = self.labels[tr_indices]
-		self.te_counts = self.counts[te_indices,:]
+		self.te_counts = self.counts[te_indices, :]
 		self.te_labels = self.labels[te_indices]
 		self.tr_docs = self.docs[tr_indices]
 		self.te_docs = self.docs[te_indices]
@@ -160,12 +171,19 @@ class TextResponseDataset(Dataset):
 		self.tr_normalized_counts = self.normalized_counts[tr_indices, :]
 		self.te_normalized_counts = self.normalized_counts[te_indices, :]
 
-		self.tr_topics = [self.get_topic(doc) for doc in self.tr_docs] #new
-		self.te_topics = [self.get_topic(doc) for doc in self.te_docs] #new
+		if self.dataset_name == 'custom' and self.mmd:  # Check if the dataset is 'custom' and mmd is True
+			self.tr_weights_pos = self.weights_pos[tr_indices]  # Assign tr_weights_pos
+			self.tr_weights_neg = self.weights_neg[tr_indices]  # Assign tr_weights_neg
+			self.tr_balanced_weights_pos = self.balanced_weights_pos[tr_indices]  # Assign tr_balanced_weights_pos
+			self.tr_balanced_weights_neg = self.balanced_weights_neg[tr_indices]  # Assign tr_balanced_weights_neg
+			self.tr_balanced_weights = self.balanced_weights[tr_indices]  # Assign tr_balanced_weights
+
+		self.tr_topics = [self.get_topic(doc) for doc in self.tr_docs]  # new
+		self.te_topics = [self.get_topic(doc) for doc in self.te_docs]  # new
 
 		if self.pretrained_theta is not None:
 			self.tr_pretrained_theta = self.pretrained_theta[tr_indices, :]
-			self.te_pretrained_theta = self.pretrained_theta[te_indices,:]
+			self.te_pretrained_theta = self.pretrained_theta[te_indices, :]
 		else:
 			self.tr_pretrained_theta = None
 			self.te_pretrained_theta = None
@@ -173,22 +191,26 @@ class TextResponseDataset(Dataset):
 	def __getitem__(self, idx):
 		if not self.eval_mode:
 			datadict = {
-					'normalized_bow':torch.tensor(self.tr_normalized_counts[idx,:], dtype=torch.float),
-					'bow':torch.tensor(self.tr_counts[idx,:], dtype=torch.long),
-					'label':torch.tensor(self.tr_labels[idx], dtype=torch.float),
-					'topic': self.tr_topics[idx]
-				}
+				'normalized_bow': torch.tensor(self.tr_normalized_counts[idx, :], dtype=torch.float),
+				'bow': torch.tensor(self.tr_counts[idx, :], dtype=torch.long),
+				'label': torch.tensor(self.tr_labels[idx], dtype=torch.float)
+			}
+			if self.dataset_name == 'custom' and self.mmd:  # Check if the dataset is 'custom' and mmd is True
+				datadict.update({
+					'balanced_weights_pos': torch.tensor(self.tr_balanced_weights_pos[idx], dtype=torch.float),
+					'balanced_weights_neg': torch.tensor(self.tr_balanced_weights_neg[idx], dtype=torch.float),
+					'balanced_weights': torch.tensor(self.tr_balanced_weights[idx], dtype=torch.float)
+				})
 			if self.tr_pretrained_theta is not None:
-				datadict.update({'pretrained_theta':torch.tensor(self.tr_pretrained_theta[idx,:], dtype=torch.float)})
+				datadict.update({'pretrained_theta': torch.tensor(self.tr_pretrained_theta[idx, :], dtype=torch.float)})
 		else:
 			datadict = {
-					'normalized_bow':torch.tensor(self.te_normalized_counts[idx,:], dtype=torch.float),
-					'bow':torch.tensor(self.te_counts[idx,:], dtype=torch.long),
-					'label':torch.tensor(self.te_labels[idx], dtype=torch.float),
-					'topic': self.tr_topics[idx]
-				}
+				'normalized_bow': torch.tensor(self.te_normalized_counts[idx, :], dtype=torch.float),
+				'bow': torch.tensor(self.te_counts[idx, :], dtype=torch.long),
+				'label': torch.tensor(self.te_labels[idx], dtype=torch.float)
+			}
 			if self.te_pretrained_theta is not None:
-				datadict.update({'pretrained_theta':torch.tensor(self.te_pretrained_theta[idx,:], dtype=torch.float)})
+				datadict.update({'pretrained_theta': torch.tensor(self.te_pretrained_theta[idx, :], dtype=torch.float)})
 		return datadict
 
 	def __len__(self):

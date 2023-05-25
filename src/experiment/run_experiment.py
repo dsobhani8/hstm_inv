@@ -215,5 +215,7 @@ if __name__ == '__main__':
 
 	flags.DEFINE_boolean("is_MMD", False, "flag to specify if causal regularizer is used or not.")
 	flags.DEFINE_float("MMD_pen_coeff", 2, "penalty coefficient of the causal regularizer.")
+	flags.DEFINE_boolean("mmd", False, "flag to specify if makar regularizer is used or not.")
+
 
 	app.run(main)
