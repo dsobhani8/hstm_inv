@@ -22,7 +22,7 @@ In this repository, we introduce two new datasets with spurious correlations ind
 ```
 
 ```
-!python -m experiment.run_experiment --procfile=/content/hstm_inv/dat/proc/comp_spurious_train_spurious_test.npz --data=custom --train_size=5000 --num_topics=20 --batch_size=32 --train_test_mode=True --do_pretraining_stage=True --is_MMD=True --MMD_pen_coeff=2
+!python -m experiment.run_experiment --procfile=/content/hstm_inv/dat/proc/STYLE_spurious_train_spurious_test.npz --data=custom --train_size=5000 --num_topics=20 --batch_size=32 --train_test_mode=True --do_pretraining_stage=True --is_MMD=True --MMD_pen_coeff=2
  ```
  
 
@@ -32,11 +32,15 @@ In this repository, we introduce two new datasets with spurious correlations ind
 !python -m experiment.run_experiment --procfile=/content/hstm_inv/dat/proc/comp_spurious_train_spurious_test.npz --data=custom --train_size=5000 --num_topics=20 --batch_size=32 --train_test_mode=True --do_pretraining_stage=True
  ```
  
-**The two new datasets are:**
+**The new datasets are:**
 
 (1) comp_spurious_train_spurious_test.npz
 
 (2) comp_spurious_train_non_spurious_test.npz
+
+(3) STYLE_spurious_train_NS_test.npz
+
+(4) STYLE_spurious_train_spurious_test.npz
 
 
 **The two new flags are:**
