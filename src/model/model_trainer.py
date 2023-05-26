@@ -6,6 +6,7 @@ from sklearn import metrics
 from sklearn.linear_model import Ridge
 import sys
 from scipy.special import expit
+from mmd_loss import mmd_loss_weighted
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -215,7 +216,7 @@ class ModelTrainer():
 					weighted_loss = balanced_weights * supervised_loss
 					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
 
-					mmd_val = mmd_loss.mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
+					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
 					weighted_mmd_vals.append(mmd_val[0])
 
 					weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)

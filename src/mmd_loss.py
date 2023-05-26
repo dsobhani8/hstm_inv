@@ -30,7 +30,13 @@ def mmd_loss_unweighted(embedding, auxiliary_labels, sigma=10):
 
 
 def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sigma=10):
-    kernel = RBFKernel(lengthscale=sigma)
+	embedding = embedding.to(device)
+	auxiliary_labels = auxiliary_labels.to(device)
+	weights_pos = weights_pos.to(device)
+	weights_neg = weights_neg.to(device)
+
+
+kernel = RBFKernel(lengthscale=sigma)
     kernel_mat = kernel(embedding, embedding)
 
     if len(auxiliary_labels.shape) == 1:
