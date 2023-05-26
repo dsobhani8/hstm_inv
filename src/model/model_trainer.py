@@ -219,12 +219,10 @@ class ModelTrainer():
 					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
 												sigma=10)
 					weighted_mmd_vals.append(mmd_val[0])
-					#print(weighted_mmd_vals)
 					weighted_mmd = torch.stack(weighted_mmd_vals)
-					#print(weighted_mmd.shape)
-					#print(weighted_loss.shape)
-
-					total_loss = (weighted_loss + (0.2 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
+					#print('aqui', weighted_loss, balanced_weights)
+					sl = (weighted_loss + (2.0 * weighted_mmd))
+					total_loss = sl + recon_loss + self.beta_penalty*kld_theta
 
 				else:
 					mmd_loss = 0
