@@ -35,12 +35,12 @@ class TextResponseDataset(Dataset):
 			'deathpenalty',
 			'guncontrol', 'custom'}
 
-	def __init__(self, dataset_name, data_file, processed_data_file, **kwargs):
+	def __init__(self, dataset_name, mmd, data_file, processed_data_file, **kwargs):
 		super(Dataset, self).__init__()
 		self.dataset_name = dataset_name
 		self.data_file = data_file
 		self.processed_data_file = processed_data_file
-
+		self.mmd = mmd
 		self.label_is_bool = False
 		if self.dataset_name in TextResponseDataset.CLASSIFICATION_SETTINGS:
 			self.label_is_bool = True
@@ -114,6 +114,7 @@ class TextResponseDataset(Dataset):
 		if os.path.exists(self.processed_data_file):
 			counts, responses, vocab, docs, balanced_weights_pos, balanced_weights_neg, balanced_weights = self.load_processed_data()
 		else:
+			raise FileNotFoundError(f"Processed data file not found: {self.processed_data_file}")
 			docs, responses = self.load_data_from_raw()
 			stop = stopwords.words('english')
 
@@ -141,6 +142,9 @@ class TextResponseDataset(Dataset):
 		self.vocab = vocab
 		self.labels = responses
 		self.docs = docs
+		self.balanced_weights = balanced_weights
+		self.balanced_weights_pos = balanced_weights_pos
+		self.balanced_weights_neg = balanced_weights_neg
 
 	def set_to_eval_mode(self):
 		self.eval_mode = True
@@ -234,6 +238,7 @@ if __name__ == '__main__':
 	parser.add_argument("--framing_topic", action='store', default='immigration')
 	parser.add_argument("--data_file", action='store', default="../dat/reviews_Office_Products_5.json")
 	parser.add_argument("--proc_file", action='store', default="../dat/proc/amazon_proc.npz")
+	parser.add_argument("--mdd", action='store', default="False")
 
 	args = parser.parse_args()
 	data = args.data
