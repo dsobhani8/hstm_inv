@@ -211,17 +211,18 @@ class ModelTrainer():
 					embedding, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels,
 																					 theta=pretrained_theta,
 																					 penalty_bow=self.penalty_bow,
-																					 penalty_gamma=self.penalty_gamma)
+																					 penalty_gamma=self.penalty_gamma,
+																					balanced_weights=balanced_weights)
 
-					weighted_loss = balanced_weights * supervised_loss
-					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
+					# weighted_loss = balanced_weights * supervised_loss
+					# weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
 
 					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
 												sigma=10)
 					weighted_mmd_vals.append(mmd_val[0])
 					weighted_mmd = torch.stack(weighted_mmd_vals)
 					#print('aqui', weighted_loss, balanced_weights)
-					sl = (weighted_loss + (2.0 * weighted_mmd))
+					sl = (supervised_loss + (2.0 * weighted_mmd))
 					total_loss = sl + recon_loss + self.beta_penalty*kld_theta
 
 				else:
