@@ -54,7 +54,7 @@ def main(argv):
 		beta=None
 
 	if FLAGS.model == 'hstm-all-2stage':
-		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
+		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.mmd, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
 	else:
 		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.mmd, FLAGS.datafile, proc_file)
 
