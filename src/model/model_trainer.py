@@ -216,11 +216,21 @@ class ModelTrainer():
 					weighted_loss = balanced_weights * supervised_loss
 					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
 
-					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
-					weighted_mmd_vals.append(mmd_val[0])
-
-					weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
-					total_loss = (weighted_loss + (10.0 * mmd_val)) + recon_loss + self.beta_penalty*kld_theta
+					#mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
+					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
+												sigma=10)
+					# print(type(mmd_val), mmd_val)
+					# weighted_mmd_vals.append(mmd_val[0].item())
+					# weighted_mmd = torch.tensor(weighted_mmd_vals)
+					#
+					# #weighted_mmd = torch.tensor(weighted_mmd_vals)
+					# #weighted_mmd_vals.append(mmd_val[0])
+					#
+					#
+					# # weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
+					#
+					# weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
+					total_loss = (weighted_loss + (10.0 * mmd_val[0])) + recon_loss + self.beta_penalty*kld_theta
 
 				else:
 					mmd_loss = 0
@@ -236,7 +246,7 @@ class ModelTrainer():
 					acc_sup_loss = torch.sum(supervised_loss).item()
 					if self.mmd:
 						print("here")
-						acc_mmd_loss = torch.sum(weighted_mmd).item()
+						acc_mmd_loss = mmd_val[0].item()
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
 					else:
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
