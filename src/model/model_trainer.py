@@ -224,7 +224,7 @@ class ModelTrainer():
 					#print(weighted_mmd.shape)
 					#print(weighted_loss.shape)
 
-					total_loss = (weighted_loss + (2.0 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
+					total_loss = (weighted_loss + (0.2 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
 
 				else:
 					mmd_loss = 0
@@ -241,7 +241,7 @@ class ModelTrainer():
 					if self.mmd:
 						print("here")
 						acc_mmd_loss = weighted_mmd.item()
-						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss, "Total loss:", total_loss.item())
 					else:
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
 					sys.stdout.flush()
