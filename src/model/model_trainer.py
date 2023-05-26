@@ -224,7 +224,7 @@ class ModelTrainer():
 					#print(weighted_mmd.shape)
 					#print(weighted_loss.shape)
 
-					total_loss = (weighted_loss + (10.0 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
+					total_loss = (weighted_loss + (2.0 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
 
 				else:
 					mmd_loss = 0

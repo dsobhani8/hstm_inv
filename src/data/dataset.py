@@ -196,15 +196,15 @@ class TextResponseDataset(Dataset):
 			datadict = {
 				'normalized_bow': torch.tensor(self.tr_normalized_counts[idx, :], dtype=torch.float),
 				'bow': torch.tensor(self.tr_counts[idx, :], dtype=torch.long),
-				'label': torch.tensor(self.tr_labels[idx], dtype=torch.float)
+				'label': torch.tensor(self.tr_labels[idx], dtype=torch.float),
+				'topic': torch.tensor(self.tr_topics[idx], dtype=torch.float)  # Add this line for 'topic' field
+
 			}
 			if self.dataset_name == 'custom' and self.mmd:  # Check if the dataset is 'custom' and mmd is True
 				datadict.update({
 					'balanced_weights_pos': torch.tensor(self.tr_balanced_weights_pos[idx], dtype=torch.float),
 					'balanced_weights_neg': torch.tensor(self.tr_balanced_weights_neg[idx], dtype=torch.float),
-					'balanced_weights': torch.tensor(self.tr_balanced_weights[idx], dtype=torch.float),
-					'topic': torch.tensor(self.tr_topics[idx], dtype=torch.float)  # Add this line for 'topic' field
-
+					'balanced_weights': torch.tensor(self.tr_balanced_weights[idx], dtype=torch.float)
 				})
 			if self.tr_pretrained_theta is not None:
 				datadict.update({'pretrained_theta': torch.tensor(self.tr_pretrained_theta[idx, :], dtype=torch.float)})
