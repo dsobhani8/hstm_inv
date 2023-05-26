@@ -205,9 +205,9 @@ class ModelTrainer():
 				# 								 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
 				#
 				# 	total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
+				weighted_mmd_vals = []
 
 				if self.mmd:
-					weighted_mmd_vals= []
 					embedding, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels,
 																					 theta=pretrained_theta,
 																					 penalty_bow=self.penalty_bow,
@@ -216,21 +216,15 @@ class ModelTrainer():
 					weighted_loss = balanced_weights * supervised_loss
 					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
 
-					#mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg, sigma=10)
 					mmd_val = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
 												sigma=10)
-					# print(type(mmd_val), mmd_val)
-					# weighted_mmd_vals.append(mmd_val[0].item())
-					# weighted_mmd = torch.tensor(weighted_mmd_vals)
-					#
-					# #weighted_mmd = torch.tensor(weighted_mmd_vals)
-					# #weighted_mmd_vals.append(mmd_val[0])
-					#
-					#
-					# # weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
-					#
-					# weighted_mmd = torch.cat(weighted_mmd_vals, dim=0)
-					total_loss = (weighted_loss + (10.0 * mmd_val[0])) + recon_loss + self.beta_penalty*kld_theta
+					weighted_mmd_vals.append(mmd_val[0])
+					#print(weighted_mmd_vals)
+					weighted_mmd = torch.stack(weighted_mmd_vals)
+					#print(weighted_mmd.shape)
+					#print(weighted_loss.shape)
+
+					total_loss = (weighted_loss + (10.0 * weighted_mmd) + recon_loss + self.beta_penalty*kld_theta)
 
 				else:
 					mmd_loss = 0
@@ -246,7 +240,7 @@ class ModelTrainer():
 					acc_sup_loss = torch.sum(supervised_loss).item()
 					if self.mmd:
 						print("here")
-						acc_mmd_loss = mmd_val[0].item()
+						acc_mmd_loss = weighted_mmd.item()
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
 					else:
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
