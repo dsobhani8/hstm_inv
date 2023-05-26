@@ -17,6 +17,9 @@ def main(argv):
 	
 	proc_file = FLAGS.procfile
 	pretraining_file = FLAGS.pretraining_file
+	mmd = FLAGS.mmd
+
+	print(mmd)
 
 	base_dataset = FLAGS.data
 	if FLAGS.data == 'framing_corpus':
@@ -54,9 +57,10 @@ def main(argv):
 		beta=None
 
 	if FLAGS.model == 'hstm-all-2stage':
-		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.mmd, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
+		text_dataset = TextResponseDataset(FLAGS.data, mmd, FLAGS.datafile, proc_file, pretrained_theta=theta_pretrained)
 	else:
-		text_dataset = TextResponseDataset(FLAGS.data, FLAGS.mmd, FLAGS.datafile, proc_file)
+		print(mmd)
+		text_dataset = TextResponseDataset(FLAGS.data, mmd, FLAGS.datafile, proc_file)
 
 	text_dataset.process_dataset()
 	text_dataset.preprocessing()
@@ -111,7 +115,8 @@ def main(argv):
 		load=FLAGS.load,
 		model_file=FLAGS.model_file,
 		is_MMD=FLAGS.is_MMD,
-		MMD_pen_coeff=FLAGS.MMD_pen_coeff)
+		MMD_pen_coeff=FLAGS.MMD_pen_coeff,
+		mmd=FLAGS.mmd)
 
 	trainer.train(training_dataloader, epochs=FLAGS.epochs, extra_epochs=FLAGS.extra_epochs)
 

@@ -23,6 +23,7 @@ class ModelTrainer():
 		self.is_MMD = is_MMD
 		self.MMD_pen_coeff= MMD_pen_coeff
 		self.mmd = mmd
+		print('here', self.mmd)
 
 		self.beta_penalty = 1.0
 		if use_pretrained:
@@ -174,7 +175,7 @@ class ModelTrainer():
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss)
 						sys.stdout.flush()
 
-
+		print('hola', self.mmd)
 		for epoch in range(epochs):
 			full_optimizer = optim.Adam(self.model.parameters(), lr=lr ,weight_decay=weight_decay)
 			for _,data in enumerate(training_loader, 0):
@@ -182,7 +183,6 @@ class ModelTrainer():
 				bow = data['bow'].to(device, dtype = torch.long)
 				labels = data['label'].to(device, dtype = torch.float)
 				confounder = data['topic'].to(device, dtype=torch.float)  # Add this line
-				print(self.mmd)
 				if self.mmd:
 					balanced_weights_pos = data['balanced_weights_pos'].to(device, dtype=torch.float)
 					balanced_weights_neg = data['balanced_weights_neg'].to(device, dtype=torch.float)
