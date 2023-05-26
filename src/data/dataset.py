@@ -33,7 +33,8 @@ class TextResponseDataset(Dataset):
 			'immigration',
 			'samesex',
 			'deathpenalty',
-			'guncontrol', 'custom'}
+			'guncontrol',
+			'custom'}
 
 	def __init__(self, dataset_name, mmd, data_file, processed_data_file, **kwargs):
 		super(Dataset, self).__init__()
@@ -238,7 +239,7 @@ if __name__ == '__main__':
 	parser.add_argument("--framing_topic", action='store', default='immigration')
 	parser.add_argument("--data_file", action='store', default="../dat/reviews_Office_Products_5.json")
 	parser.add_argument("--proc_file", action='store', default="../dat/proc/amazon_proc.npz")
-	parser.add_argument("--mdd", action='store', default="False")
+	parser.add_argument("--mmd", action='store', default="False")
 
 	args = parser.parse_args()
 	data = args.data
