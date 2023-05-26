@@ -182,7 +182,7 @@ class ModelTrainer():
 				bow = data['bow'].to(device, dtype = torch.long)
 				labels = data['label'].to(device, dtype = torch.float)
 				confounder = data['topic'].to(device, dtype=torch.float)  # Add this line
-
+				print(self.mmd)
 				if self.mmd:
 					balanced_weights_pos = data['balanced_weights_pos'].to(device, dtype=torch.float)
 					balanced_weights_neg = data['balanced_weights_neg'].to(device, dtype=torch.float)
@@ -233,8 +233,9 @@ class ModelTrainer():
 					acc_loss = torch.sum(recon_loss).item()
 					acc_kl_theta_loss = torch.sum(kld_theta).item()
 					acc_sup_loss = torch.sum(supervised_loss).item()
-					if self.is_MMD:
-						acc_mmd_loss = torch.sum(mmd_loss).item()
+					if self.mmd:
+						print("here")
+						acc_mmd_loss = torch.sum(weighted_mmd).item()
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss)
 					else:
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
