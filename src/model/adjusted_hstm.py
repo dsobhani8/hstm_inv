@@ -156,7 +156,7 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 		return expected_pred
 
 
-	def forward(self, bows, normalized_bows, labels, theta=None, do_prediction=True, penalty_bow=True, penalty_gamma=True, balanced_weights=None):
+	def forward(self, bows, normalized_bows, labels, theta=None, do_prediction=True, penalty_bow=True, penalty_gamma=True):
 		if self.is_bool:
 			loss = nn.BCEWithLogitsLoss()
 		else:
@@ -176,14 +176,13 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 		if do_prediction:
 			expected_label_pred = self.predict_labels(theta, normalized_bows)
 			other_loss += loss(expected_label_pred, labels)
-			weighted_loss = balanced_weights * other_loss
-			weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
+
 			if penalty_gamma:
 				other_loss += get_l1_loss(self.gammas, C=self.C_topics)
 			if penalty_bow:
 				other_loss += self.C_weights*(torch.norm(self.bow_weights.weight))
 
-			return preds, recon_loss, weighted_loss, kld_theta
+			return preds, recon_loss, other_loss, kld_theta
 		else:
 			return recon_loss, other_loss, kld_theta
 
