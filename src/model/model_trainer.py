@@ -24,7 +24,6 @@ class ModelTrainer():
 		self.is_MMD = is_MMD
 		self.MMD_pen_coeff= MMD_pen_coeff
 		self.mmd = mmd
-		print('here', self.mmd)
 
 		self.beta_penalty = 1.0
 		if use_pretrained:
@@ -221,7 +220,11 @@ class ModelTrainer():
 					weighted_mmd = torch.stack(weighted_mmd_vals)
 
 					sl = (weighted_loss + (2.0 * weighted_mmd))
-					total_loss = sl + recon_loss + self.beta_penalty*kld_theta
+					if epoch < 5:
+						total_loss = weighted_mmd
+					else:
+						total_loss = sl + recon_loss + self.beta_penalty*kld_theta
+
 
 				else:
 					mmd_loss = 0
