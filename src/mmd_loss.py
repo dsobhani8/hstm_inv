@@ -43,7 +43,6 @@ def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sig
     auxiliary_labels = auxiliary_labels.to(device)
     weights_pos = weights_pos.to(device)
     weights_neg = weights_neg.to(device)
-    #print(embedding.shape)
 
     # If the weights are 1D tensors, add an additional dimension
     if len(weights_pos.shape) == 1:
@@ -53,8 +52,6 @@ def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sig
 
     kernel = RBFKernel(ard_num_dims=embedding.size(1), lengthscale=sigma).to(device)
     kernel_mat = kernel(embedding, embedding)
-
-    #print(kernel_mat.shape)
 
     if len(auxiliary_labels.shape) == 1:
         auxiliary_labels = auxiliary_labels.unsqueeze(-1)

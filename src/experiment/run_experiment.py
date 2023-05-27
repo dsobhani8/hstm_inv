@@ -19,8 +19,6 @@ def main(argv):
 	pretraining_file = FLAGS.pretraining_file
 	mmd = FLAGS.mmd
 
-	print(mmd)
-
 	base_dataset = FLAGS.data
 	if FLAGS.data == 'framing_corpus':
 		base_dataset = FLAGS.data + '_' + FLAGS.framing_topic

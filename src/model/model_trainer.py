@@ -176,7 +176,6 @@ class ModelTrainer():
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss)
 						sys.stdout.flush()
 
-		print('hola', self.mmd)
 		for epoch in range(epochs):
 			full_optimizer = optim.Adam(self.model.parameters(), lr=lr ,weight_decay=weight_decay)
 			for _,data in enumerate(training_loader, 0):
@@ -220,7 +219,7 @@ class ModelTrainer():
 												sigma=10)
 					weighted_mmd_vals.append(mmd_val[0])
 					weighted_mmd = torch.stack(weighted_mmd_vals)
-					#print('aqui', weighted_loss, balanced_weights)
+
 					sl = (weighted_loss + (2.0 * weighted_mmd))
 					total_loss = sl + recon_loss + self.beta_penalty*kld_theta
 
@@ -239,7 +238,7 @@ class ModelTrainer():
 
 					if self.mmd:
 						acc_mmd_loss = weighted_mmd.item()
-						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss, "Total loss:", total_loss.item())
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss,"MMD loss:", acc_mmd_loss, "sl loss:", sl.item())
 					else:
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
 					sys.stdout.flush()
