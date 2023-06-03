@@ -182,7 +182,7 @@ class HeterogeneousSupervisedTopicModel(nn.Module):
 			if penalty_bow:
 				other_loss += self.C_weights*(torch.norm(self.bow_weights.weight))
 
-			return preds, recon_loss, other_loss, kld_theta
+			return theta, recon_loss, other_loss, kld_theta
 		else:
 			return recon_loss, other_loss, kld_theta
 

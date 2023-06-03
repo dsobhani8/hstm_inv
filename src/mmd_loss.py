@@ -43,13 +43,11 @@ def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sig
     auxiliary_labels = auxiliary_labels.to(device)
     weights_pos = weights_pos.to(device)
     weights_neg = weights_neg.to(device)
-    print(embedding.shape)
     # If the weights are 1D tensors, add an additional dimension
     if len(weights_pos.shape) == 1:
         weights_pos = weights_pos.unsqueeze(0)
     if len(weights_neg.shape) == 1:
         weights_neg = weights_neg.unsqueeze(0)
-    print(auxiliary_labels.shape)
 
     kernel = RBFKernel(ard_num_dims=embedding.size(1), lengthscale=sigma).to(device)
     kernel_mat = kernel(embedding, embedding)
@@ -61,7 +59,6 @@ def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sig
     pos_mask = torch.bmm(auxiliary_labels, auxiliary_labels.transpose(-2, -1))
     neg_mask = torch.bmm(1.0 - auxiliary_labels, (1.0 - auxiliary_labels).transpose(-2, -1))
 
-    print(pos_mask.shape)
 
 
     pos_neg_mask = torch.bmm(auxiliary_labels, (1.0 - auxiliary_labels).transpose(-2, -1))
@@ -92,7 +89,6 @@ def mmd_loss_weighted(embedding, auxiliary_labels, weights_pos, weights_neg, sig
     pos_neg_kernel_mean = torch.div((pos_neg_kernel_mean * weights_pos.squeeze()).sum(), weights_pos.sum())
 
     mmd_val = pos_kernel_mean + neg_kernel_mean - (pos_neg_kernel_mean + neg_pos_kernel_mean)
-    print(mmd_val.shape)
     mmd_val = torch.clamp_min(mmd_val, 0.0)
 
     return mmd_val, pos_kernel_mean, neg_kernel_mean, pos_neg_kernel_mean, pos_neg_kernel_mean

@@ -98,30 +98,6 @@ class ModelTrainer():
 					acc_sup_loss = torch.sum(supervised_loss).item()
 					print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
 
-	def train_topic_model(self, training_loader, epochs=10, lr=0.01, weight_decay=1.2e-6):
-		optimizer = optim.Adam(self.model.parameters(), lr=lr ,weight_decay=weight_decay)
-		for epoch in range(epochs):
-			self.model.train()
-			for _,data in enumerate(training_loader, 0):
-				normalized_bow = data['normalized_bow'].to(device, dtype = torch.float)
-				bow = data['bow'].to(device, dtype = torch.long)
-				
-				if self.model_name == 'slda':
-					labels = data['label'].to(device, dtype = torch.float)
-					recon_loss, penalty, kld_theta = self.model(bow, normalized_bow, labels)
-				else:
-					recon_loss, penalty, kld_theta = self.model(bow, normalized_bow)
-				optimizer.zero_grad()
-				total_loss = recon_loss + penalty + self.beta_penalty*kld_theta
-
-				total_loss.backward()
-				optimizer.step()
-				
-				if _%5000==0:
-					acc_loss = torch.sum(recon_loss).item()
-					acc_kl_theta_loss = torch.sum(kld_theta).item()
-					acc_sup_loss = torch.sum(penalty).item()
-					print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss, "Supervised loss:", acc_sup_loss)
 
 	def compute_kernel(self, x, y, sigma_sqr=None):
 		"""
@@ -150,6 +126,69 @@ class ModelTrainer():
 		mmd = x_kernel.mean() + y_kernel.mean() - 2 * xy_kernel.mean()
 		mmd = torch.maximum(torch.zeros_like(mmd), mmd)
 		return mmd
+
+	def train_topic_model(self, training_loader, epochs=10, lr=0.01, weight_decay=1.2e-6):
+		optimizer = optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+		for epoch in range(epochs):
+			self.model.train()
+			for _, data in enumerate(training_loader, 0):
+				normalized_bow = data['normalized_bow'].to(device, dtype=torch.float)
+				bow = data['bow'].to(device, dtype=torch.long)
+				confounder = data['topic'].to(device, dtype=torch.float)  # Add this line
+
+				if self.mmd:
+					balanced_weights_pos = data['balanced_weights_pos'].to(device, dtype=torch.float)
+					balanced_weights_neg = data['balanced_weights_neg'].to(device, dtype=torch.float)
+					balanced_weights = data['balanced_weights'].to(device, dtype=torch.float)
+
+				if self.model_name == 'slda':
+					labels = data['label'].to(device, dtype=torch.float)
+					predictions, recon_loss, penalty, kld_theta = self.model(bow, normalized_bow, labels)
+				else:
+					recon_loss, penalty, kld_theta = self.model(bow, normalized_bow)
+
+				# weighted_mmd_vals = []
+				# if self.mmd:
+				# 	weighted_loss = balanced_weights * penalty
+				# 	weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
+				#
+				# 	mmd_loss, pos_kernel_mean, neg_kernel_mean, a, b = mmd_loss_weighted(theta, confounder,
+				# 																		 balanced_weights_pos,
+				# 																		 balanced_weights_neg, sigma=10)
+				#
+				# 	weighted_mmd_vals.append(mmd_loss)
+				# 	# print(pos_kernel_mean, neg_kernel_mean)
+				# 	weighted_mmd = torch.stack(weighted_mmd_vals)
+				#
+				# 	sl = (weighted_loss + (199 * weighted_mmd))
+
+				if self.is_MMD:
+					predictions_z0 = predictions[confounder == 0]
+					predictions_z1 = predictions[confounder == 1]
+
+					mmd_loss = (self.compute_mmd(predictions_z0.reshape(-1, 1).to(torch.float64),
+												 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
+
+					total_loss = recon_loss + penalty + self.beta_penalty*kld_theta + mmd_loss
+
+				optimizer.zero_grad()
+
+				#total_loss = sl + recon_loss + self.beta_penalty * kld_theta
+
+				total_loss.backward()
+				optimizer.step()
+
+				if _ % 5000 == 0:
+					acc_loss = torch.sum(recon_loss).item()
+					acc_kl_theta_loss = torch.sum(kld_theta).item()
+					acc_sup_loss = torch.sum(penalty).item()
+					if not self.mmd:
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss,
+							  "Supervised loss:", acc_sup_loss)
+					else:
+						acc_mmd_loss = mmd_loss.item()
+						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss,
+							  "Supervised loss:", acc_sup_loss, "MMD loss:", acc_mmd_loss, "sl loss:", sl.item())
 
 	def train_supervised_model(self, training_loader, epochs=10, extra_epochs=10, lr=0.01, weight_decay=1.2e-6):
 		if self.do_pretraining_stage:
@@ -203,33 +242,31 @@ class ModelTrainer():
 												 predictions_z1.reshape(-1, 1).to(torch.float64)) * self.MMD_pen_coeff)
 
 					total_loss = recon_loss + supervised_loss + self.beta_penalty*kld_theta + mmd_loss
-				# weighted_mmd_vals = []
-				#
-				# if self.mmd:
-				# 	embedding, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels,
-				# 																	 theta=pretrained_theta,
-				# 																	 penalty_bow=self.penalty_bow,
-				# 																	 penalty_gamma=self.penalty_gamma)
-				#
-				# 	weighted_loss = balanced_weights * supervised_loss
-				# 	weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
-				#
-				# 	mmd_val, pos_kernel_mean, neg_kernel_mean, a, b = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
-				# 								sigma=10)
-				# 	weighted_mmd_vals.append(mmd_val)
-				# 	#print(pos_kernel_mean, neg_kernel_mean)
-				# 	weighted_mmd = torch.stack(weighted_mmd_vals)
-				#
-				# 	sl = (weighted_loss + (.2 * weighted_mmd))
-				# 	if epoch < 8:
-				# 		total_loss = .2*weighted_mmd
-				# 	else:
-				# 		total_loss = sl + recon_loss + self.beta_penalty*kld_theta
+				weighted_mmd_vals = []
 
+				if self.mmd:
+					embedding, recon_loss, supervised_loss, kld_theta = self.model(bow, normalized_bow, labels,
+																					 theta=pretrained_theta,
+																					 penalty_bow=self.penalty_bow,
+																					 penalty_gamma=self.penalty_gamma)
+
+					weighted_loss = balanced_weights * supervised_loss
+					weighted_loss = torch.sum(weighted_loss) / torch.sum(balanced_weights)
+
+					mmd_loss, pos_kernel_mean, neg_kernel_mean, a, b = mmd_loss_weighted(embedding, confounder, balanced_weights_pos, balanced_weights_neg,
+												sigma=10)
+					weighted_mmd_vals.append(mmd_loss)
+					#print(pos_kernel_mean, neg_kernel_mean)
+					weighted_mmd = torch.stack(weighted_mmd_vals)
+
+					sl = (weighted_loss + (10 * weighted_mmd))
+
+					total_loss = sl + recon_loss + self.beta_penalty*kld_theta
 
 				else:
 					mmd_loss = 0
 					total_loss = recon_loss + supervised_loss + self.beta_penalty * kld_theta
+
 
 				full_optimizer.zero_grad()
 				total_loss.backward()

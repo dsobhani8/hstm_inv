@@ -155,5 +155,5 @@ class SupervisedLDA(nn.Module):
 
         if aggregate:
             recon_loss = recon_loss.mean()
-        return recon_loss, supervised_loss, kld_theta
+        return preds, recon_loss, supervised_loss, kld_theta
 
