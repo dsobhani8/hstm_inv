@@ -188,7 +188,7 @@ class ModelTrainer():
 					else:
 						acc_mmd_loss = mmd_loss.item()
 						print("Epoch:", epoch, "Acc. loss:", acc_loss, "KL loss.:", acc_kl_theta_loss,
-							  "Supervised loss:", acc_sup_loss, "MMD loss:", acc_mmd_loss, "sl loss:", sl.item())
+							  "Supervised loss:", acc_sup_loss, "MMD loss:", acc_mmd_loss)
 
 	def train_supervised_model(self, training_loader, epochs=10, extra_epochs=10, lr=0.01, weight_decay=1.2e-6):
 		if self.do_pretraining_stage:
@@ -207,7 +207,8 @@ class ModelTrainer():
 					pretraining_optim.zero_grad()
 					total_loss.backward()
 					pretraining_optim.step()
-
+					# Free up GPU memory
+					torch.cuda.empty_cache()
 					if _%5000==0:
 						acc_loss = torch.sum(recon_loss).item()
 						acc_kl_theta_loss = torch.sum(kld_theta).item()
